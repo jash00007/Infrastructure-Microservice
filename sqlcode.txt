@@ -96,7 +96,31 @@ VALUES
 (2, 25.3, 60.0, 80.4, NOW() - INTERVAL 10 MINUTE),
 (2, 27.8, 65.1, 82.3, NOW());
 
+CREATE TABLE lab_server (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  lab_id INT NOT NULL,
+  server_id INT NOT NULL,
+  FOREIGN KEY (lab_id) REFERENCES labs(id) ON DELETE CASCADE,
+  FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE
+);
 
+INSERT INTO lab_server (lab_id, server_id) VALUES 
+(1, 1),
+(2, 2),
+(3, 1);
+
+DROP TABLE server_stats;
+
+– Table 6: server_stats
+CREATE TABLE server_stats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    server_id INT NOT NULL,
+    cpu_usage FLOAT DEFAULT 0,
+    memory_usage FLOAT DEFAULT 0,
+    disk_usage FLOAT DEFAULT 0,
+    recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE
+);
 
 
 

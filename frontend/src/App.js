@@ -1,26 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import Performance from './pages/Performance';
+import LabMonitoring from './pages/LabMonitoring';
+import CreateLab from './pages/CreateLab';
+import DeleteLab from './pages/DeleteLab';
+import ResourceAllocation from './pages/ResourceAllocation';
+import Navbar from './components/Navbar';
 
 function App() {
-  const [stats, setStats] = useState([]);
-
-  useEffect(() => {
-    axios.get('http://localhost:3001/api/servers/1/stats')
-      .then(res => setStats(res.data))
-      .catch(err => console.error(err));
-  }, []);
-
   return (
-    <div>
-      <h1>Server Stats</h1>
-      <ul>
-        {stats.map((row, i) => (
-          <li key={i}>
-            Time: {row.recorded_at} | CPU: {row.cpu_usage}% | Mem: {row.memory_usage}% | Disk: {row.disk_usage}%
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Router>
+      <Navbar />
+
+      <Routes>
+      <Route path="/" element={<Home />} />
+      <Route index element={<Home />} />
+
+        <Route path="/performance" element={<Performance />} />
+        <Route path="/monitoring" element={<LabMonitoring />} />
+        <Route path="/create-lab" element={<CreateLab />} />
+        <Route path="/delete-lab" element={<DeleteLab />} />
+        <Route path="/allocate-resources" element={<ResourceAllocation />} />
+      </Routes>
+    </Router>
   );
 }
 
