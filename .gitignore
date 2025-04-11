@@ -1,14 +1,18 @@
-backend/node_modules/
-frontend/node_modules/
+# Node modules
+/backend/node_modules/
+/frontend/node_modules/
 
-backend/.env
+# Environment
+/backend/.env
 
+# Logs
 *.log
 
+# OS and IDE files
 .DS_Store
 .vscode/
 .idea/
 
-dist/
-build/
-
+# Build artifacts
+/dist/
+/build/
