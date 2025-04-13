@@ -1,27 +1,27 @@
+// App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
-import Performance from './pages/Performance';
-import LabMonitoring from './pages/LabMonitoring';
-import CreateLab from './pages/CreateLab';
-import DeleteLab from './pages/DeleteLab';
-import ResourceAllocation from './pages/ResourceAllocation';
-import Navbar from './components/Navbar';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// Page imports
+import HomePage from './pages/HomePage';
+import CreateLabPage from './pages/CreateLabPage';
+import DeleteLabPage from './pages/DeleteLabPage';
+import MonitorPage from './pages/MonitorPage';
+import PerformancePage from './pages/PerformancePage';
+import ResourceAllocationPage from './pages/ResourceAllocationPage';
+import LogsPage from './pages/LogsPage'; // Optional logs view
 
 function App() {
   return (
     <Router>
-      <Navbar />
-
       <Routes>
-      <Route path="/" element={<Home />} />
-      <Route index element={<Home />} />
-
-        <Route path="/performance" element={<Performance />} />
-        <Route path="/monitoring" element={<LabMonitoring />} />
-        <Route path="/create-lab" element={<CreateLab />} />
-        <Route path="/delete-lab" element={<DeleteLab />} />
-        <Route path="/allocate-resources" element={<ResourceAllocation />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/lab-creation" element={<CreateLabPage />} />
+        <Route path="/lab-deletion" element={<DeleteLabPage />} />
+        <Route path="/lab-monitoring" element={<MonitorPage />} />
+        <Route path="/server-performance" element={<PerformancePage />} />
+        <Route path="/resource-allocation" element={<ResourceAllocationPage />} />
+        <Route path="/logs" element={<LogsPage />} />
       </Routes>
     </Router>
   );

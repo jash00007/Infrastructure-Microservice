@@ -122,6 +122,43 @@ CREATE TABLE server_stats (
     FOREIGN KEY (server_id) REFERENCES servers(id) ON DELETE CASCADE
 );
 
+ALTER TABLE labs DROP FOREIGN KEY labs_ibfk_1;
+
+ALTER TABLE labs DROP COLUMN assigned_server;
+
+CREATE TABLE lab_access_log (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  lab_id INT,
+  user_count INT,
+  duration_minutes INT, -- how long the users used the lab
+  accessed_at DATETIME DEFAULT NOW(),
+  FOREIGN KEY (lab_id) REFERENCES labs(id)
+);
+
+ALTER TABLE servers
+ADD COLUMN max_cpu FLOAT DEFAULT 100,
+ADD COLUMN max_memory FLOAT DEFAULT 100,
+ADD COLUMN max_disk FLOAT DEFAULT 100;
+
+ALTER TABLE labs
+ADD COLUMN estimated_users INT DEFAULT 10,
+ADD COLUMN estimated_cpu FLOAT DEFAULT 10,
+ADD COLUMN estimated_memory FLOAT DEFAULT 20,
+ADD COLUMN estimated_disk FLOAT DEFAULT 5;
+
+ALTER TABLE labs
+ADD COLUMN estimated_users INT DEFAULT 10,
+ADD COLUMN estimated_cpu FLOAT DEFAULT 10,
+ADD COLUMN estimated_memory FLOAT DEFAULT 20,
+ADD COLUMN estimated_disk FLOAT DEFAULT 5;
+
+ALTER TABLE labs ADD COLUMN avg_users FLOAT DEFAULT NULL;
+ALTER TABLE labs ADD COLUMN total_sessions INT DEFAULT 0;
+ALTER TABLE labs ADD COLUMN total_user_minutes INT DEFAULT 0;
+
+ALTER TABLE labs ADD COLUMN avg_time FLOAT;
+
+
 
 
 
