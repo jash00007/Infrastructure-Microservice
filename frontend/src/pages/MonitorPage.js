@@ -12,17 +12,14 @@ const MonitorPage = () => {
   const [popularLabs, setPopularLabs] = useState([]);
 
   useEffect(() => {
-    // Fetch lab list
-    axios.get('http://localhost:3003/monitor/labs') // assuming your lab-service runs here
+    axios.get('http://localhost:3003/monitor/labs')
       .then(res => setLabs(res.data))
       .catch(err => console.error("Error fetching labs:", err));
 
-    // Fetch monitoring data
     fetchMonitoringData();
   }, []);
 
   const fetchMonitoringData = () => {
-    // Fetch monitoring data (lab utilization and popular labs)
     axios.get('http://localhost:3003/monitor/labs/over-under-utilized')
       .then(res => setUtilizationData(res.data))
       .catch(err => console.error("Error fetching utilization data:", err));
@@ -41,57 +38,83 @@ const MonitorPage = () => {
       });
 
       setSimulationResult(res.data.usage);
-      
-      // After simulation, fetch updated utilization and popular labs data
       fetchMonitoringData();
     } catch (err) {
       console.error("Simulation failed:", err);
     }
   };
 
-  return (
-    <div style={{ padding: '2rem' }}>
-      <h2>📊 Lab Monitoring Dashboard</h2>
+  const tableStyle = {
+    width: '100%',
+    borderCollapse: 'collapse',
+    marginTop: '10px',
+    marginBottom: '20px',
+    boxShadow: '0 0 5px rgba(0,0,0,0.1)',
+    backgroundColor: '#ffffff'
+  };
 
-      <form onSubmit={handleSimulate} style={{ marginTop: '1rem', marginBottom: '2rem' }}>
-        <h3>🧪 Simulate Lab Usage</h3>
-        <label>
-          Select Lab:
-          <select value={labId} onChange={e => setLabId(e.target.value)} required>
+  const thTdStyle = {
+    border: '1px solid #ccc',
+    padding: '12px',
+    textAlign: 'left'
+  };
+
+  const sectionStyle = {
+    marginBottom: '2rem',
+    padding: '1.5rem',
+    border: '1px solid #ddd',
+    borderRadius: '6px',
+    backgroundColor: '#f9f9f9'
+  };
+
+  return (
+    <div style={{ padding: '2rem', maxWidth: '900px', margin: '0 auto' }}>
+      <h2 style={{ fontSize: '24px', marginBottom: '1rem' }}>Lab Monitoring Dashboard</h2>
+
+      <form onSubmit={handleSimulate} style={{ ...sectionStyle, padding: '20px', border: '1px solid #ddd', borderRadius: '6px' }}>
+        <h3 style={{ fontSize: '20px', marginBottom: '16px' }}>Simulate Lab Usage</h3>
+
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', marginBottom: '4px' }}>Select Lab:</label>
+          <select value={labId} onChange={e => setLabId(e.target.value)} required style={{ width: '100%', padding: '8px' }}>
             <option value="">-- Choose a lab --</option>
             {labs.map(lab => (
               <option key={lab.id} value={lab.id}>{lab.name}</option>
             ))}
           </select>
-        </label>
-        <br /><br />
-        <label>
-          Active Users:
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', marginBottom: '4px' }}>Active Users:</label>
           <input
             type="number"
             value={activeUsers}
             onChange={e => setActiveUsers(e.target.value)}
             required
+            style={{ width: '98%', padding: '8px' }}
           />
-        </label>
-        <br /><br />
-        <label>
-          Duration (minutes):
+        </div>
+
+        <div style={{ marginBottom: '12px' }}>
+          <label style={{ display: 'block', marginBottom: '4px' }}>Duration (minutes):</label>
           <input
             type="number"
             value={duration}
             onChange={e => setDuration(e.target.value)}
             required
+            style={{ width: '98%', padding: '8px' }}
           />
-        </label>
-        <br /><br />
-        <button type="submit">Simulate</button>
+        </div>
+
+        <button type="submit" style={{ padding: '10px 16px', backgroundColor: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          Simulate
+        </button>
       </form>
 
       {simulationResult && (
-        <div style={{ marginBottom: '2rem' }}>
-          <h4>📈 Simulated Resource Usage</h4>
-          <ul>
+        <div style={sectionStyle}>
+          <h4 style={{ fontSize: '18px', marginBottom: '8px' }}>Simulated Resource Usage</h4>
+          <ul style={{ paddingLeft: '20px' }}>
             <li>CPU: {simulationResult.cpu}</li>
             <li>Memory: {simulationResult.memory}</li>
             <li>Disk: {simulationResult.disk}</li>
@@ -99,46 +122,46 @@ const MonitorPage = () => {
         </div>
       )}
 
-      <div>
-        <h3>📉 Lab Utilization</h3>
-        <table border="1" cellPadding="10">
+      <div style={sectionStyle}>
+        <h3 style={{ fontSize: '20px' }}>Lab Utilization</h3>
+        <table style={tableStyle}>
           <thead>
             <tr>
-              <th>Lab</th>
-              <th>Estimated Users</th>
-              <th>Average Users</th>
-              <th>Status</th>
+              <th style={thTdStyle}>Lab</th>
+              <th style={thTdStyle}>Estimated Users</th>
+              <th style={thTdStyle}>Average Users</th>
+              <th style={thTdStyle}>Status</th>
             </tr>
           </thead>
           <tbody>
             {utilizationData.map(lab => (
               <tr key={lab.lab_id}>
-                <td>{lab.name}</td>
-                <td>{lab.estimated_users}</td>
-                <td>{lab.avg_users}</td>
-                <td>{lab.status}</td>
+                <td style={thTdStyle}>{lab.name}</td>
+                <td style={thTdStyle}>{lab.estimated_users}</td>
+                <td style={thTdStyle}>{lab.avg_users}</td>
+                <td style={thTdStyle}>{lab.status}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <div style={{ marginTop: '2rem' }}>
-        <h3>🔥 Most Popular Labs</h3>
-        <table border="1" cellPadding="10">
+      <div style={sectionStyle}>
+        <h3 style={{ fontSize: '20px' }}>Most Popular Labs</h3>
+        <table style={tableStyle}>
           <thead>
             <tr>
-              <th>Lab</th>
-              <th>Total Sessions</th>
-              <th>Total User Minutes</th>
+              <th style={thTdStyle}>Lab</th>
+              <th style={thTdStyle}>Total Sessions</th>
+              <th style={thTdStyle}>Total User Minutes</th>
             </tr>
           </thead>
           <tbody>
             {popularLabs.map(lab => (
               <tr key={lab.lab_id}>
-                <td>{lab.name}</td>
-                <td>{lab.total_sessions}</td>
-                <td>{lab.total_user_minutes}</td>
+                <td style={thTdStyle}>{lab.name}</td>
+                <td style={thTdStyle}>{lab.total_sessions}</td>
+                <td style={thTdStyle}>{lab.total_user_minutes}</td>
               </tr>
             ))}
           </tbody>

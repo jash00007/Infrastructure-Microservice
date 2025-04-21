@@ -1,4 +1,3 @@
-// pages/CreateLabPage.js
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -22,21 +21,70 @@ const CreateLabPage = () => {
       alert('Lab created and resources allocated!');
     } catch (err) {
       console.error(err);
-      alert('Error creating lab');
+      alert(err?.response?.data?.message || 'Error creating lab');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4">
-      <h2 className="text-xl font-bold mb-4">Create New Lab</h2>
-      {['name', 'estimated_users', 'estimated_cpu', 'estimated_memory', 'estimated_disk'].map(field => (
-        <div key={field} className="mb-3">
-          <label className="block">{field.replace('_', ' ').toUpperCase()}</label>
-          <input type="text" name={field} value={form[field]} onChange={handleChange} className="border p-2 w-full" />
-        </div>
-      ))}
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Create Lab</button>
-    </form>
+    <div style={{ maxWidth: '500px', margin: '40px auto', padding: '20px' }}>
+      <form
+        onSubmit={handleSubmit}
+        style={{
+          padding: '30px',
+          border: '1px solid #ccc',
+          borderRadius: '8px',
+          backgroundColor: '#fff',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+        }}
+      >
+        <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '30px', textAlign: 'center' }}>
+          Create New Lab
+        </h2>
+
+        {['name', 'estimated_users', 'estimated_cpu', 'estimated_memory', 'estimated_disk'].map(field => (
+          <div key={field} style={{ marginBottom: '20px' }}>
+            <label
+              htmlFor={field}
+              style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: '#333' }}
+            >
+              {field.replace(/_/g, ' ').toUpperCase()}
+            </label>
+            <input
+              type={field === 'name' ? 'text' : 'number'}
+              name={field}
+              value={form[field]}
+              onChange={handleChange}
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                fontSize: '14px',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
+        ))}
+
+        <button
+          type="submit"
+          style={{
+            width: '100%',
+            marginTop: '20px',
+            backgroundColor: '#2563eb',
+            color: '#fff',
+            padding: '12px',
+            fontSize: '16px',
+            borderRadius: '6px',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Create Lab
+        </button>
+      </form>
+    </div>
   );
 };
 
