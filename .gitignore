@@ -1,9 +1,8 @@
 # Node modules
-/backend/node_modules/
-/frontend/node_modules/
+**/node_modules/
 
 # Environment
-/backend/.env
+**/.env/
 
 # Logs
 *.log

@@ -3,52 +3,64 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const HomePage = () => {
-  return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <h1 className="text-4xl font-bold mb-6 text-center text-blue-800">Lab Infrastructure Management</h1>
+  const containerStyle = {
+    minHeight: '100vh',
+    backgroundColor: '#f3f4f6',
+    padding: '2rem'
+  };
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        <Link
-          to="/lab-creation"
-          className="bg-green-600 text-white px-6 py-4 rounded shadow hover:bg-green-700 transition"
-        >
+  const titleStyle = {
+    fontSize: '2.5rem',
+    fontWeight: 'bold',
+    marginBottom: '2rem',
+    textAlign: 'center'
+    
+  };
+
+  const gridStyle = {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '1.5rem',
+    maxWidth: '800px',
+    margin: '0 auto'
+  };
+
+  const cardStyle = (bgColor, hoverColor) => ({
+    backgroundColor: bgColor,
+    color: '#fff',
+    padding: '1.25rem 1.5rem',
+    borderRadius: '8px',
+    textDecoration: 'none',
+    boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+    textAlign: 'center',
+    transition: 'background-color 0.3s',
+    fontSize: '1.1rem',
+    fontWeight: '500'
+  });
+
+  return (
+    <div style={containerStyle}>
+      <h1 style={titleStyle}>Lab Infrastructure Management</h1>
+
+      <div style={gridStyle}>
+        <Link to="/lab-creation" style={cardStyle('#444242')}>
           ➕ Create Lab
         </Link>
 
-        <Link
-          to="/lab-deletion"
-          className="bg-red-600 text-white px-6 py-4 rounded shadow hover:bg-red-700 transition"
-        >
+        <Link to="/lab-deletion" style={cardStyle('#444242')}>
           🗑️ Delete Lab
         </Link>
 
-        <Link
-          to="/lab-monitoring"
-          className="bg-yellow-500 text-white px-6 py-4 rounded shadow hover:bg-yellow-600 transition"
-        >
+        <Link to="/lab-monitoring" style={cardStyle('#444242')}>
           📊 Monitor Labs
         </Link>
 
-        <Link
-          to="/server-performance"
-          className="bg-purple-600 text-white px-6 py-4 rounded shadow hover:bg-purple-700 transition"
-        >
+        <Link to="/server-performance" style={cardStyle('#444242')}>
           🖥️ Server Performance
         </Link>
 
-        <Link
-          to="/resource-allocation"
-          className="bg-blue-600 text-white px-6 py-4 rounded shadow hover:bg-blue-700 transition"
-        >
+        <Link to="/resource-allocation" style={cardStyle('#444242')}>
           ⚙️ Resource Allocation
-        </Link>
-
-        {/* Add more links if you add new services like reports, access logs, etc. */}
-        <Link
-          to="/logs"
-          className="bg-gray-700 text-white px-6 py-4 rounded shadow hover:bg-gray-800 transition"
-        >
-          📁 View Logs
         </Link>
       </div>
     </div>

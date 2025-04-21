@@ -158,7 +158,28 @@ ALTER TABLE labs ADD COLUMN total_user_minutes INT DEFAULT 0;
 
 ALTER TABLE labs ADD COLUMN avg_time FLOAT;
 
+ALTER TABLE lab_server
+ADD COLUMN cpu_allocated INT DEFAULT 0,
+ADD COLUMN memory_allocated INT DEFAULT 0,
+ADD COLUMN disk_allocated INT DEFAULT 0;
 
+-- Drop the existing foreign key
+ALTER TABLE lab_access_log
+DROP FOREIGN KEY lab_access_log_ibfk_1;
+
+-- Re-add it without cascading delete
+ALTER TABLE lab_access_log
+ADD CONSTRAINT lab_access_log_ibfk_1
+FOREIGN KEY (lab_id)
+REFERENCES labs(id)
+ON DELETE NO ACTION
+ON UPDATE NO ACTION;
+
+ALTER TABLE lab_access_log
+DROP FOREIGN KEY lab_access_log_ibfk_1;
+
+alter table logs drop foreign key logs_ibfk_1;
+alter table logs drop column admin_id;
 
 
 

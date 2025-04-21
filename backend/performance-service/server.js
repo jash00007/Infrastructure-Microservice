@@ -21,11 +21,17 @@ const pool = mysql.createPool({
 });
 
 // Helper to simulate load based on access logs
-function simulateLoad(cpu, memory, disk, userCount, duration) {
+function simulateLoad(estimatedCpu, estimatedMemory, estimatedDisk, estimatedUsers, userCount, duration) {
+  const timeFactor = duration / 10;
+  const rawFactor = (userCount * timeFactor) / (estimatedUsers || 1); // Avoid divide by 0
+  const factor = Math.min(rawFactor, 3); // Cap at 3x load
+
+  const variance = 1 + (Math.random() * 0.1 - 0.05); // ±5%
+
   return {
-    cpu: Math.min(cpu + userCount * 1.5 * duration, 100),
-    memory: Math.min(memory + userCount * 2 * duration, 100),
-    disk: Math.min(disk + userCount * 0.5 * duration, 100)
+    cpu: estimatedCpu * factor * variance,
+    memory: estimatedMemory * factor * variance,
+    disk: estimatedDisk * factor * variance
   };
 }
 
@@ -59,7 +65,15 @@ function updateStats() {
 
             accessLogs.forEach(log => {
               const { user_count, duration_minutes } = log;
-              const usage = simulateLoad(lab.estimated_cpu, lab.estimated_memory, lab.estimated_disk, user_count, duration_minutes);
+              const usage = simulateLoad(
+                lab.estimated_cpu,
+                lab.estimated_memory,
+                lab.estimated_disk,
+                lab.estimated_users,
+                user_count,
+                duration_minutes
+              );
+              
               cpuUsage += usage.cpu;
               memoryUsage += usage.memory;
               diskUsage += usage.disk;
@@ -94,7 +108,6 @@ updateStats();
 
 // Route to get stats for all servers
 app.get('/performance/servers/stats', (req, res) => {
-  console.log(`Request received for all server stats`);
 
   pool.query('SELECT * FROM server_stats', (err, results) => {
     if (err) return res.status(500).send(err);
@@ -104,7 +117,6 @@ app.get('/performance/servers/stats', (req, res) => {
 
 // Route to get server stats for a specific server
 app.get('/performance/servers/:id/stats', (req, res) => {
-  console.log(`Request received for server stats with ID: ${req.params.id}`);
   
   const { id } = req.params;
 
@@ -115,7 +127,6 @@ app.get('/performance/servers/:id/stats', (req, res) => {
 });
 
 app.get('/performance/servers/:id/peaks', (req, res) => {
-  console.log(`Request received for server peaks with ID: ${req.params.id}`);
   const { id } = req.params;
   pool.query(`
     SELECT accessed_at, SUM(user_count) AS total_users

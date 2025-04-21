@@ -37,12 +37,15 @@ app.post('/simulate/:labId', (req, res) => {
     if (err || labs.length === 0) return res.status(404).send('Lab not found');
 
     const lab = labs[0];
-    const factor = active_users / lab.estimated_users;
+
+    // 👇 Now that we have `lab`, calculate factor correctly
+    const timeFactor = duration_minutes / 10;
+    const factor = (active_users * timeFactor) / lab.estimated_users;
+
     const cpu = lab.estimated_cpu * factor;
     const memory = lab.estimated_memory * factor;
     const disk = lab.estimated_disk * factor;
 
-    // Insert lab usage log
     // Insert lab usage log
     pool.query(
       `INSERT INTO lab_access_log (lab_id, accessed_at, duration_minutes, user_count)
@@ -56,7 +59,7 @@ app.post('/simulate/:labId', (req, res) => {
 
         console.log('Usage simulated for lab', labId);
 
-        // Update the average lab utilization (avg_users, avg_time) after simulation
+        // Update average utilization
         pool.query(
           `UPDATE labs 
           SET avg_users = (SELECT AVG(user_count) FROM lab_access_log WHERE lab_id = ?),
@@ -72,7 +75,7 @@ app.post('/simulate/:labId', (req, res) => {
           }
         );
 
-        // Update the most popular labs (total_sessions, total_user_minutes)
+        // Update popular metrics
         pool.query(
           `UPDATE labs 
           SET total_sessions = (SELECT COUNT(*) FROM lab_access_log WHERE lab_id = ?),
@@ -85,7 +88,7 @@ app.post('/simulate/:labId', (req, res) => {
               return res.status(500).send(popularLabsErr);
             }
             console.log('Popular labs updated for lab', labId);
-            // Only send the response here after all operations are done
+
             res.send({
               message: 'Usage simulated and metrics updated',
               usage: {
@@ -98,7 +101,6 @@ app.post('/simulate/:labId', (req, res) => {
         );
       }
     );
-
   });
 });
 
@@ -117,11 +119,14 @@ app.get('/usage/:labId', (req, res) => {
   );
 });
 
-// GET /monitor/labs/over-under-utilized
-// Get average usage stats for a lab
 app.get('/monitor/labs/over-under-utilized', (req, res) => {
   pool.query(`
-    SELECT l.id, l.name, l.estimated_users, AVG(a.user_count) as avg_users
+    SELECT 
+      l.id, 
+      l.name, 
+      l.estimated_users,
+      COALESCE(AVG(a.user_count), 0) AS avg_users,
+      COALESCE(AVG(a.duration_minutes), 0) AS avg_time
     FROM labs l
     LEFT JOIN lab_access_log a ON l.id = a.lab_id
     GROUP BY l.id, l.name, l.estimated_users
@@ -131,18 +136,27 @@ app.get('/monitor/labs/over-under-utilized', (req, res) => {
     const thresholds = { upper: 1.25, lower: 0.75 };
 
     const analysis = results.map(row => {
-      const ratio = row.avg_users / row.estimated_users;
+      const avgUsers = Number(row.avg_users);
+      const avgTime = Number(row.avg_time);
+      const estimatedUsers = row.estimated_users;
+
+      // Normalize time-aware usage to 10-minute basis
+      const normalizedUsage = avgUsers * (avgTime / 10);
+      const expectedUsage = estimatedUsers; // assumed per 10 minutes
+
+      const ratio = normalizedUsage / expectedUsage;
+
       let status = 'normal';
       if (ratio > thresholds.upper) status = 'over-utilized';
       else if (ratio < thresholds.lower) status = 'under-utilized';
 
-      // Safely handle avg_users and ensure it's a valid number
-      const avgUsers = Number(row.avg_users);
       return {
         lab_id: row.id,
         name: row.name,
-        estimated_users: row.estimated_users,
-        avg_users: Number.isFinite(avgUsers) ? parseFloat(avgUsers.toFixed(2)) : null,  // Check if avg_users is a valid number
+        estimated_users: estimatedUsers,
+        avg_users: Number.isFinite(avgUsers) ? parseFloat(avgUsers.toFixed(2)) : null,
+        avg_time: Number.isFinite(avgTime) ? parseFloat(avgTime.toFixed(2)) : null,
+        normalized_usage: parseFloat(normalizedUsage.toFixed(2)),
         ratio: parseFloat(ratio.toFixed(2)),
         status
       };

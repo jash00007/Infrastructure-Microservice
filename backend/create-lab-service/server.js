@@ -35,16 +35,27 @@ function findServersForLab(cpu, memory, disk, callback) {
   });
 }
 
-// API endpoint to create a new lab
 app.post('/create-lab/create', (req, res) => {
-  const { name, estimated_users, estimated_cpu, estimated_memory, estimated_disk } = req.body;
+  const name = req.body.name;
+  const estimated_users = parseInt(req.body.estimated_users);
+  const estimated_cpu = parseInt(req.body.estimated_cpu);
+  const estimated_memory = parseInt(req.body.estimated_memory);
+  const estimated_disk = parseInt(req.body.estimated_disk);
 
-  // Check for missing fields
-  if (!name || !estimated_users || !estimated_cpu || !estimated_memory || !estimated_disk) {
-    return res.status(400).send('Missing required fields');
+  if (
+    !name ||
+    isNaN(estimated_users) ||
+    isNaN(estimated_cpu) ||
+    isNaN(estimated_memory) ||
+    isNaN(estimated_disk)
+  ) {
+    return res.status(400).send('Missing or invalid required fields');
   }
 
-  // Insert new lab into the database
+  const total_cpu = estimated_cpu * estimated_users;
+  const total_memory = estimated_memory * estimated_users;
+  const total_disk = estimated_disk * estimated_users;
+
   pool.query(
     'INSERT INTO labs (name, estimated_users, estimated_cpu, estimated_memory, estimated_disk) VALUES (?, ?, ?, ?, ?)',
     [name, estimated_users, estimated_cpu, estimated_memory, estimated_disk],
@@ -57,53 +68,76 @@ app.post('/create-lab/create', (req, res) => {
       const labId = result.insertId;
       console.log(`Lab created with ID: ${labId}`);
 
-      // Find available servers that meet the lab's resource requirements
-      findServersForLab(estimated_cpu, estimated_memory, estimated_disk, (err, availableServers) => {
+      pool.query('SELECT * FROM servers', (err, servers) => {
         if (err) {
-          console.error('Error finding available servers:', err);
-          return res.status(500).send({ message: 'Error finding available servers' });
+          console.error('Error fetching servers:', err);
+          return res.status(500).send('Error fetching servers');
         }
 
-        // If no suitable servers found, send error response
-        if (availableServers.length === 0) {
-          console.error('No suitable servers found for lab creation');
-          return res.status(400).send('No suitable servers available');
-        }
+        let cpuLeft = total_cpu;
+        let memLeft = total_memory;
+        let diskLeft = total_disk;
+        const allocs = [];
 
-        // Choose the first suitable server (you can implement a better selection strategy)
-        const server = availableServers[0];
-        const serverId = server.id;
+        for (let s of servers) {
+          if (cpuLeft <= 0 && memLeft <= 0 && diskLeft <= 0) break;
 
-        // Associate lab with server in the lab_server table
-        pool.query(
-          'INSERT INTO lab_server (lab_id, server_id) VALUES (?, ?)',
-          [labId, serverId],
-          (err, result) => {
-            if (err) {
-              console.error('Error associating lab with server:', err);
-              return res.status(500).send({ message: 'Error associating lab with server' });
-            }
+          const availableCPU = Math.max(0, s.max_cpu - s.cpu_usage);
+          const availableMem = Math.max(0, s.max_memory - s.memory_usage);
+          const availableDisk = Math.max(0, s.max_disk - s.disk_usage);
 
-            // Update server resources (e.g., cpu_usage, memory_usage, disk_usage)
-            pool.query(
-              'UPDATE servers SET cpu_usage = cpu_usage + ?, memory_usage = memory_usage + ?, disk_usage = disk_usage + ? WHERE id = ?',
-              [estimated_cpu, estimated_memory, estimated_disk, serverId],
-              (err, result) => {
-                if (err) {
-                  console.error('Error updating server resources:', err);
-                  return res.status(500).send({ message: 'Error updating server resources' });
-                }
+          const cpuToAlloc = Math.min(cpuLeft, availableCPU);
+          const memToAlloc = Math.min(memLeft, availableMem);
+          const diskToAlloc = Math.min(diskLeft, availableDisk);
 
-                // Return success response with labId and serverId
-                res.send({
-                  message: 'Lab created and server allocated',
-                  labId,
-                  serverId: server.id
-                });
-              }
-            );
+          if (cpuToAlloc > 0 || memToAlloc > 0 || diskToAlloc > 0) {
+            allocs.push({
+              server_id: s.id,
+              cpu: cpuToAlloc,
+              memory: memToAlloc,
+              disk: diskToAlloc
+            });
+
+            cpuLeft -= cpuToAlloc;
+            memLeft -= memToAlloc;
+            diskLeft -= diskToAlloc;
           }
-        );
+        }
+
+        if (cpuLeft > 0 || memLeft > 0 || diskLeft > 0) {
+          console.error('Not enough server capacity for new lab');
+          return res.status(400).send('Not enough server capacity for new lab');
+        }
+
+        function performAllocations(index = 0) {
+          if (index >= allocs.length) {
+            return res.send({
+              message: 'Lab created and resources allocated',
+              labId,
+              allocations: allocs
+            });
+          }
+
+          const alloc = allocs[index];
+          pool.query(
+            'INSERT INTO lab_server (lab_id, server_id, cpu_allocated, memory_allocated, disk_allocated) VALUES (?, ?, ?, ?, ?)',
+            [labId, alloc.server_id, alloc.cpu, alloc.memory, alloc.disk],
+            (err) => {
+              if (err) return res.status(500).send('Error inserting lab_server row');
+
+              pool.query(
+                'UPDATE servers SET cpu_usage = cpu_usage + ?, memory_usage = memory_usage + ?, disk_usage = disk_usage + ? WHERE id = ?',
+                [alloc.cpu, alloc.memory, alloc.disk, alloc.server_id],
+                (err) => {
+                  if (err) return res.status(500).send('Error updating server usage');
+                  performAllocations(index + 1);
+                }
+              );
+            }
+          );
+        }
+
+        performAllocations();
       });
     }
   );
