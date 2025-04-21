@@ -176,6 +176,9 @@ ON DELETE NO ACTION
 ON UPDATE NO ACTION;
 
 ALTER TABLE lab_access_log
+ADD COLUMN is_active tinyint(1) default 1;
+
+ALTER TABLE lab_access_log
 DROP FOREIGN KEY lab_access_log_ibfk_1;
 
 alter table logs drop foreign key logs_ibfk_1;

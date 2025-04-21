@@ -62,6 +62,14 @@ const HomePage = () => {
         <Link to="/resource-allocation" style={cardStyle('#444242')}>
           ⚙️ Resource Allocation
         </Link>
+
+        <Link to="/S3-storage" style={cardStyle('#444242')}>
+          🪣 Bucket Storage Backup
+        </Link>
+
+        <Link to="/calendar" style={cardStyle('#444242')}>
+          📅 Calendar Auto Create
+        </Link>
       </div>
     </div>
   );
