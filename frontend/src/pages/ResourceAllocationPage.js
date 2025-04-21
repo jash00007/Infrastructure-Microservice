@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 function ResourceAllocationPage() {
   const [labs, setLabs] = useState([]);
@@ -20,9 +21,9 @@ function ResourceAllocationPage() {
 
   const fetchData = async () => {
     const [labsRes, serversRes, allocationsRes] = await Promise.all([
-      axios.get('http://localhost:3005/labs'),
-      axios.get('http://localhost:3005/servers'),
-      axios.get('http://localhost:3005/allocations')
+      axios.get(`${config.RESOURCE_URL}/labs`),
+      axios.get(`${config.RESOURCE_URL}/servers`),
+      axios.get(`${config.RESOURCE_URL}/allocations`)
     ]);
     setLabs(labsRes.data);
     setServers(serversRes.data);
@@ -31,7 +32,7 @@ function ResourceAllocationPage() {
 
   const handleAddServer = async () => {
     try {
-      await axios.post('http://localhost:3005/servers', {
+      await axios.post(`${config.RESOURCE_URL}/servers`, {
         ip_address: newServer.ip_address,
         max_cpu: Number(newServer.max_cpu),
         max_memory: Number(newServer.max_memory),
@@ -59,7 +60,7 @@ function ResourceAllocationPage() {
     } = labScaling;
 
     try {
-      await axios.patch(`http://localhost:3005/labs/${selectedLabId}`, {
+      await axios.patch(`${config.RESOURCE_URL}/labs/${selectedLabId}`, {
         per_user_cpu: Number(per_user_cpu),
         per_user_memory: Number(per_user_memory),
         per_user_disk: Number(per_user_disk),

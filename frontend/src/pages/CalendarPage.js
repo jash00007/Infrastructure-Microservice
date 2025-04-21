@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-const API_BASE_CALENDAR = 'http://localhost:5000';
-const API_BASE_INFRA = 'http://localhost:3001';
-const API_BASE_LAB_MONITORING = 'http://localhost:3003';
+import config from '../config';
 
 const LabManager = () => {
   const [potentialLabs, setPotentialLabs] = useState([]);
@@ -28,7 +25,7 @@ const LabManager = () => {
       const endDateUTC = tomorrowEndUTC.toISOString();
 
       try {
-        const response = await fetch(`${API_BASE_CALENDAR}/api/events/range?start=${startDateUTC}&end=${endDateUTC}`);
+        const response = await fetch(`${config.CALENDAR_URL}/api/events/range?start=${startDateUTC}&end=${endDateUTC}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -59,7 +56,7 @@ const LabManager = () => {
 
     try {
       // Check if a lab with the same name already exists
-      const monitorResponse = await fetch(`${API_BASE_LAB_MONITORING}/monitor/labs`);
+      const monitorResponse = await fetch(`${config.MONITOR_URL}/monitor/labs`);
       if (!monitorResponse.ok) {
         throw new Error(`HTTP error! status: ${monitorResponse.status}`);
       }
@@ -71,7 +68,7 @@ const LabManager = () => {
         alert(`A lab with the name "${defaultLabConfig.name}" already exists.`);
       } else {
         // Create a new lab if it doesn't exist
-        const createResponse = await fetch(`${API_BASE_INFRA}/create-lab/create`, {
+        const createResponse = await fetch(`${config.CREATE_LAB_URL}/create-lab/create`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -104,7 +101,7 @@ const LabManager = () => {
 
     try {
       // 1. Fetch existing labs to check for duplicates
-      const monitorResponse = await fetch(`${API_BASE_LAB_MONITORING}/monitor/labs`);
+      const monitorResponse = await fetch(`${config.MONITOR_URL}/monitor/labs`);
       if (!monitorResponse.ok) {
         throw new Error(`HTTP error! status: ${monitorResponse.status}`);
       }
@@ -127,7 +124,7 @@ const LabManager = () => {
           estimated_disk: 10,
         };
 
-        const createResponse = await fetch(`${API_BASE_INFRA}/create-lab/create`, {
+        const createResponse = await fetch(`${config.CREATE_LAB_URL}/create-lab/create`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -1,0 +1,90 @@
+services:
+  create-lab:
+    build:
+      context: ./backend/create-lab-service
+    ports:
+      - "3001:3001"
+    container_name: create-lab-service
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_USER=root
+      - DB_PASS=${MYSQL_ROOT_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+
+  delete-lab:
+    build:
+      context: ./backend/delete-lab-service
+    ports:
+      - "3002:3002"
+    container_name: delete-lab-service
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_USER=root
+      - DB_PASS=${MYSQL_ROOT_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+
+  lab-monitoring:
+    build:
+      context: ./backend/lab-monitoring-service
+    ports:
+      - "3003:3003"
+    container_name: lab-monitoring-service
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_USER=root
+      - DB_PASS=${MYSQL_ROOT_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+
+  performance:
+    build:
+      context: ./backend/performance-service
+    ports:
+      - "3004:3004"
+    container_name: performance-service
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_USER=root
+      - DB_PASS=${MYSQL_ROOT_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+
+  resource-allocation:
+    build:
+      context: ./backend/resourceAllocation
+    ports:
+      - "3005:3005"
+    container_name: resource-allocation-service
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_USER=root
+      - DB_PASS=${MYSQL_ROOT_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+
+  backup:
+    build:
+      context: ./backend/backup-service
+    ports:
+      - "3006:3006"
+    container_name: backup-service
+    environment:
+      - DB_HOST=host.docker.internal
+      - DB_USER=root
+      - DB_PASS=${MYSQL_ROOT_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:80"
+    container_name: frontend-service
+    depends_on:
+      - create-lab
+      - delete-lab
+      - lab-monitoring
+      - performance
+      - resource-allocation
+      - backup
+
+volumes:
+  mysql_data:
+    driver: local

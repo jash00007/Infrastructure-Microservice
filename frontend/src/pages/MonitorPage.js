@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 const MonitorPage = () => {
   const [labs, setLabs] = useState([]);
@@ -12,7 +13,7 @@ const MonitorPage = () => {
   const [popularLabs, setPopularLabs] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:3003/monitor/labs')
+    axios.get(`${config.MONITOR_URL}/monitor/labs`)
       .then(res => setLabs(res.data))
       .catch(err => console.error("Error fetching labs:", err));
 
@@ -20,11 +21,11 @@ const MonitorPage = () => {
   }, []);
 
   const fetchMonitoringData = () => {
-    axios.get('http://localhost:3003/monitor/labs/over-under-utilized')
+    axios.get(`${config.MONITOR_URL}/monitor/labs/over-under-utilized`)
       .then(res => setUtilizationData(res.data))
       .catch(err => console.error("Error fetching utilization data:", err));
 
-    axios.get('http://localhost:3003/monitor/labs/popular')
+    axios.get(`${config.MONITOR_URL}/monitor/labs/popular`)
       .then(res => setPopularLabs(res.data))
       .catch(err => console.error("Error fetching popular labs:", err));
   };
@@ -32,7 +33,7 @@ const MonitorPage = () => {
   const handleSimulate = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`http://localhost:3003/simulate/${labId}`, {
+      const res = await axios.post(`${config.MONITOR_URL}/simulate/${labId}`, {
         active_users: Number(activeUsers),
         duration_minutes: Number(duration)
       });

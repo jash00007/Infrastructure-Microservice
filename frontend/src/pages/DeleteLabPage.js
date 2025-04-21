@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 const DeleteLabPage = () => {
   const [labs, setLabs] = useState([]);
   const [labId, setLabId] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:3002/delete-lab')
+    axios.get(`${config.DELETE_LAB_URL}/delete-lab`)
       .then(res => setLabs(res.data))
       .catch(err => console.error("Failed to fetch labs:", err));
   }, []);
@@ -14,7 +15,7 @@ const DeleteLabPage = () => {
   const handleDelete = async () => {
     if (!labId) return alert('Please select a lab to delete');
     try {
-      await axios.delete(`http://localhost:3002/delete/${labId}`);
+      await axios.delete(`${config.DELETE_LAB_URL}/delete/${labId}`);
       alert('Lab deleted');
       setLabs(labs.filter(lab => lab.id !== labId)); // remove from dropdown
       setLabId('');

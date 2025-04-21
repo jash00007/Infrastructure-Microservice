@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import config from '../config';
 
 const CreateLabPage = () => {
   const [form, setForm] = useState({
@@ -17,7 +18,7 @@ const CreateLabPage = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3001/create-lab/create', form);
+      await axios.post(`${config.CREATE_LAB_URL}/create-lab/create`, form);
       alert('Lab created and resources allocated!');
     } catch (err) {
       console.error(err);

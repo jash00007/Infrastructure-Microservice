@@ -47,7 +47,7 @@ CREATE TABLE reports (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-– Table 6: server_stats
+-– Table 6: server_stats
 CREATE TABLE server_stats (
     id INT AUTO_INCREMENT PRIMARY KEY,
     server_id INT NOT NULL,

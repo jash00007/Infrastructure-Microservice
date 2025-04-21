@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const ENDPOINT_ROUTE_BASE = "http://localhost:3009"; // Replace with your actual endpoint route
+import config from '../config';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -22,7 +21,7 @@ const LoginPage = () => {
     setError(''); // Clear any previous errors
 
     try {
-      const response = await fetch(`${ENDPOINT_ROUTE_BASE}/api/auth/login`, { // Replace '/api/login' with your actual API endpoint
+      const response = await fetch(`${config.AUTH_URL}/api/auth/login`, { // Replace '/api/login' with your actual API endpoint
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

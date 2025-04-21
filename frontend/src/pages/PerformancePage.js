@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
+import axios from 'axios';
+import config from '../config';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,7 +12,6 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import axios from 'axios';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -20,7 +21,7 @@ const PerformancePage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`http://localhost:3004/performance/servers/stats`)
+    axios.get(`${config.PERFORMANCE_URL}/performance/servers/stats`)
       .then(async (response) => {
         const stats = response.data;
         setServerStats(stats);
@@ -28,7 +29,7 @@ const PerformancePage = () => {
         const peakData = {};
         for (const id of serverIds) {
           try {
-            const res = await axios.get(`http://localhost:3004/performance/servers/${id}/peaks`);
+            const res = await axios.get(`${config.PERFORMANCE_URL}/performance/servers/${id}/peaks`);
             peakData[id] = res.data;
           } catch (err) {
             console.error(`Error fetching peaks for server ${id}`, err);

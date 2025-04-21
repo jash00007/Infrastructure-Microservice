@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
+import config from '../config';
 
 const BackupDatabase = () => {
   const [backupStatus, setBackupStatus] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const backupServerUrl = 'http://localhost:3006'; // URL of your backup server
 
   const handleBackupAndUpload = async () => {
     setBackupStatus('Initiating backup...');
     setErrorMessage('');
 
     try {
-      const response = await fetch(`${backupServerUrl}/backup-and-upload-db`);
+      const response = await fetch(`${config.BACKUP_URL}/backup-and-upload-db`);
       const data = await response.json();
 
       if (response.ok) {

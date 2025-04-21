@@ -8,7 +8,7 @@ const axios = require('axios');
 
 const app = express();
 const port = 3006;
-const cloudStorageBaseUrl = 'http://localhost:8000';
+const cloudStorageBaseUrl = process.env.CLOUD_STORAGE_URL || 'http://localhost:8000';
 const adminUserId = 'admin';
 
 app.use(cors());
